@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Orders</title>
+  <link rel="stylesheet" href="/assets/design.css?v=1">
+</head>
+<body>
+  <header class="scs-header">
+    <a href="/catalog">Shop</a>
+    <a href="/orders/">Orders</a>
+    <span class="spacer"></span>
+    <span class="owner">orders &middot; fastapi</span>
+  </header>
+
+  <main>
+    <h1>Order history</h1>
+
+    {% if orders %}
+      {% for order in orders %}
+        <div class="card">
+          <div class="grow">
+            <div class="name">Order {{ order.id }}</div>
+            <div class="meta">
+              {{ order.placed_at.strftime('%Y-%m-%d %H:%M:%S') }} &middot;
+              {% for item in order['items'] %}{{ item.qty }}&times; {{ item.name }}{% if not loop.last %}, {% endif %}{% endfor %}
+            </div>
+          </div>
+          <div>$ {{ '%.2f'|format(order.total) }}</div>
+        </div>
+      {% endfor %}
+      <p class="stale">Built entirely from checkout's feed, stored in orders' own database. This page never calls checkout or catalog.</p>
+    {% else %}
+      <p>No orders yet. <a href="/catalog">Browse products</a>.</p>
+      <p class="stale">Orders appear within a few seconds of checkout: this SCS polls checkout's feed every 5s.</p>
+    {% endif %}
+  </main>
+</body>
+</html>

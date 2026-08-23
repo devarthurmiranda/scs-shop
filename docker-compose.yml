@@ -1,0 +1,50 @@
+services:
+  postgres:
+    image: postgres:17.2-alpine
+    environment:
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+  catalog:
+    build: ./catalog
+    environment:
+      DATABASE_URL: postgres://catalog:catalog@postgres:5432/catalog_db
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  checkout:
+    build: ./checkout
+    environment:
+      DATABASE_URL: postgres://checkout:checkout@postgres:5432/checkout_db
+      CATALOG_FEED_URL: http://catalog:3000/catalog/feed
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  orders:
+    build: ./orders
+    environment:
+      DATABASE_URL: postgres://orders:orders@postgres:5432/orders_db
+      CHECKOUT_FEED_URL: http://checkout:3001/checkout/feed
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  router:
+    image: nginx:1.27-alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./router/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./shared-assets:/usr/share/nginx/assets:ro
+    depends_on:
+      - catalog
+      - checkout
+      - orders
