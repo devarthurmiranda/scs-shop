@@ -118,6 +118,15 @@ docker compose exec postgres psql -U checkout -d catalog_db   # permission denie
 Postgres cannot query across databases, and no role can connect to another system's
 database. The boundary is enforced by the engine, not by a code review.
 
+## Docs
+
+- [docs/sharing_data.md](docs/sharing_data.md) - how one system gets data it does not own,
+  traced through the raise-price example end to end: append-only feed, consumer-held
+  cursor, idempotent upsert, and why stale beats broken.
+- [docs/routing.md](docs/routing.md) - how three stacks live under one hostname without
+  colliding: prefix ownership, why the router must not strip the prefix, trailing slashes,
+  cross-system links, and SSI transclusion.
+
 ## Layout
 
 ```
@@ -128,6 +137,7 @@ router/          nginx.conf: routing + SSI
 shared-assets/   design.css, the only shared thing
 db/init.sql      three roles, three databases
 demo/            the two scripts you run on stage
+docs/            sharing_data.md, routing.md
 ```
 
 ## Honest limitations of this demo
